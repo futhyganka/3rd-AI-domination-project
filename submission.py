@@ -164,18 +164,77 @@ from nlparser import GrammarRule
 def createRule1() -> GrammarRule:
     # Return a GrammarRule for 'every $Noun $Verb some $Noun'
     # Note: universal quantification should be outside existential quantification.
+    # Every person likes some cat
+    # => \/X person(X) -> ]Y likes(X, Y) ^ cat(Y)
     # BEGIN_YOUR_CODE (our solution is 3 lines of code, but don't worry if you deviate from this)
-    raise Exception("Not implemented yet")
+    return GrammarRule(
+        '$Clause',
+        ['every', '$Noun', '$Verb', 'some', '$Noun'],
+        lambda args: Forall(
+            '$x',
+            Implies( 
+                Atom(args[0].title(), '$x'),
+                Exists(
+                    '$y',
+                    And(
+                        Atom(args[1].title(), '$x', '$y'),
+                        Atom(args[2].title(), '$y')
+                    )
+                )
+            )
+        )
+    )
     # END_YOUR_CODE
 
 def createRule2() -> GrammarRule:
     # Return a GrammarRule for 'there is some $Noun that every $Noun $Verb'
+    # There is some cat that every person likes 
+    # => ]X cat(X) ^ \/Y  (person(Y) -> like(Y, X))
     # BEGIN_YOUR_CODE (our solution is 3 lines of code, but don't worry if you deviate from this)
-    raise Exception("Not implemented yet")
+    return GrammarRule(
+        '$Clause',
+        ['there', 'is', 'some', '$Noun', 'that', 'every', '$Noun', '$Verb'],
+        lambda args: Exists(
+            '$x',
+            And(
+                Atom(args[0].title(), '$x'),
+                Forall(
+                    '$y',
+                    Implies(
+                        Atom(args[1].title(), '$y'),
+                        Atom(args[2].title(), '$y', '$x')
+                    )
+                )
+            )
+        )
+        
+    )
     # END_YOUR_CODE
 
 def createRule3() -> GrammarRule:
     # Return a GrammarRule for 'if a $Noun $Verb a $Noun then the former $Verb the latter'
+    # If a person likes a cat then the former feeds the latter
+    # => ]X]Y person(X) ^ like(X, Y) ^ cat(Y) -> feads(X, Y)
     # BEGIN_YOUR_CODE (our solution is 20 lines of code, but don't worry if you deviate from this)
-    raise Exception("Not implemented yet")
+    return GrammarRule(
+        '$Clause', 
+        ['if', 'a', '$Noun', '$Verb', 'a', '$Noun', 'then', 'the', 'former', '$Verb', 'the', 'latter'],
+        lambda args: Forall(
+            '$x',
+            Forall(
+                '$y',
+                Implies(
+                    And(
+                        Atom(args[0].title(), '$x'),
+                        And(
+                            Atom(args[1].title(), '$x', '$y'),
+                            Atom(args[2].title(), '$y')
+                        )
+                    ),
+                    Atom(args[3].title(), '$x', '$y')
+                )
+                
+            )
+        )
+    )
     # END_YOUR_CODE
