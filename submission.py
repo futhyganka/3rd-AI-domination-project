@@ -13,7 +13,7 @@ def formula1a() -> Formula:
     California = Atom('California')       # whether we're in California
     Rain = Atom('Rain')                   # whether it's raining
     # BEGIN_YOUR_CODE (our solution is 1 line of code, but don't worry if you deviate from this)
-    raise Exception("Not implemented yet")
+    return Implies(And(Summer, California), Not(Rain))
     # END_YOUR_CODE
 
 # Sentence: "It's wet if and only if it is raining or the sprinklers are on."
@@ -23,7 +23,7 @@ def formula1b() -> Formula:
     Wet = Atom('Wet')                # whether it it wet
     Sprinklers = Atom('Sprinklers')  # whether the sprinklers are on
     # BEGIN_YOUR_CODE (our solution is 1 line of code, but don't worry if you deviate from this)
-    raise Exception("Not implemented yet")
+    return Equiv(Wet, Or(Rain, Sprinklers))
     # END_YOUR_CODE
 
 # Sentence: "Either it's day or night (but not both)."
@@ -32,7 +32,7 @@ def formula1c() -> Formula:
     Day = Atom('Day')     # whether it's day
     Night = Atom('Night') # whether it's night
     # BEGIN_YOUR_CODE (our solution is 1 line of code, but don't worry if you deviate from this)
-    raise Exception("Not implemented yet")
+    return Xor(Day, Night)
     # END_YOUR_CODE
 
 ############################################################
@@ -46,7 +46,7 @@ def formula2a() -> Formula:
 
     # Note: You do NOT have to enforce that the parent is a "person"
     # BEGIN_YOUR_CODE (our solution is 1 line of code, but don't worry if you deviate from this)
-    raise Exception("Not implemented yet")
+    return Forall('$x', Implies(Person('$x'), Exists('$y', Parent('$x', '$y'))))
     # END_YOUR_CODE
 
 # Sentence: "At least one person has no children."
@@ -57,7 +57,7 @@ def formula2b() -> Formula:
 
     # Note: You do NOT have to enforce that the child is a "person"
     # BEGIN_YOUR_CODE (our solution is 1 line of code, but don't worry if you deviate from this)
-    raise Exception("Not implemented yet")
+    return Exists('$x', And(Person('$x'), Forall('$y', Not(Child('$x', '$y')))))
     # END_YOUR_CODE
 
 # Return a formula which defines Father in terms of Male and Parent
@@ -68,7 +68,7 @@ def formula2c() -> Formula:
     def Parent(x, y): return Atom('Parent', x, y)        # whether x has a parent y
     def Father(x, y): return Atom('Father', x, y)        # whether x has a father y
     # BEGIN_YOUR_CODE (our solution is 4 lines of code, but don't worry if you deviate from this)
-    raise Exception("Not implemented yet")
+    return Forall('$x', Forall('$y', Equiv(Father('$x', '$y'), And(Male('$y'), Parent('$x', '$y')))))
     # END_YOUR_CODE
 
 # Return a formula which defines Granddaughter in terms of Female and Child.
@@ -79,7 +79,7 @@ def formula2d() -> Formula:
     def Child(x, y): return Atom('Child', x, y)                  # whether x has a child y
     def Granddaughter(x, y): return Atom('Granddaughter', x, y)  # whether x has a granddaughter y
     # BEGIN_YOUR_CODE (our solution is 5 lines of code, but don't worry if you deviate from this)
-    raise Exception("Not implemented yet")
+    return Forall('$x', Forall('$y', Equiv(Granddaughter('$x', '$y'), And(Female('$y'), Exists('$z', And(Child('$x', '$z'), Child('$z', '$y')))))))
     # END_YOUR_CODE
 
 ############################################################
