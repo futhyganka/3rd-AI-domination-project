@@ -142,7 +142,86 @@ def ints() -> Tuple[List[Formula], Formula]:
     formulas = []
     query = None
     # BEGIN_YOUR_CODE (our solution is 23 lines of code, but don't worry if you deviate from this)
-    raise Exception("Not implemented yet")
+    # Cau 4a-0: Moi so co dung mot so ke tiep, khac chinh no
+    formulas.append(
+        Forall('$x',
+            Exists('$y',
+                AndList([
+                    Successor('$x', '$y'),
+                    Not(Equals('$x', '$y')),
+                    Forall('$z',
+                        Implies(
+                            Successor('$x', '$z'),
+                            Equals('$z', '$y')
+                        )
+                    )
+                ])
+            )
+        )
+    )
+
+    # Cau 4a-1: Moi so hoac chan hoac le, khong dong thoi
+    formulas.append(
+        Forall('$x',
+            And(
+                Or(Even('$x'), Odd('$x')),
+                Not(And(Even('$x'), Odd('$x')))
+            )
+        )
+    )
+
+    # Cau 4a-2: So ke tiep cua so chan la so le
+    formulas.append(
+        Forall('$x',
+            Forall('$y',
+                Implies(
+                    And(Even('$x'), Successor('$x', '$y')),
+                    Odd('$y')
+                )
+            )
+        )
+    )
+
+    # Cau 4a-3: So ke tiep cua so le la so chan
+    formulas.append(
+        Forall('$x',
+            Forall('$y',
+                Implies(
+                    And(Odd('$x'), Successor('$x', '$y')),
+                    Even('$y')
+                )
+            )
+        )
+    )
+
+    # Cau 4a-4: So ke tiep lon hon so hien tai
+    formulas.append(
+        Forall('$x',
+            Forall('$y',
+                Implies(
+                    Successor('$x', '$y'),
+                    Larger('$y', '$x')
+                )
+            )
+        )
+    )
+
+    # Cau 4a-5: Quan he Larger co tinh bac cau
+    formulas.append(
+        Forall('$x',
+            Forall('$y',
+                Forall('$z',
+                    Implies(
+                        And(
+                            Larger('$x', '$y'),
+                            Larger('$y', '$z')
+                        ),
+                        Larger('$x', '$z')
+                    )
+                )
+            )
+        )
+    )
     # END_YOUR_CODE
     query = Forall('$x', Exists('$y', And(Even('$y'), Larger('$y', '$x'))))
     return (formulas, query)
