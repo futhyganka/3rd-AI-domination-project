@@ -107,10 +107,70 @@ def liar() -> Tuple[List[Formula], Formula]:
     susan = Constant('susan')
     formulas = []
     # We provide the formula for fact 0 here.
+    # Fact 0: Mark says: "It wasn't me!"
     formulas.append(Equiv(TellTruth(mark), Not(CrashedServer(mark))))
     # You should add 5 formulas, one for each of facts 1-5.
     # BEGIN_YOUR_CODE (our solution is 11 lines of code, but don't worry if you deviate from this)
-    raise Exception("Not implemented yet")
+    
+    # Fact 1: John says "It was Nicole!"
+    formulas.append(Equiv(TellTruth(john), CrashedServer(nicole)))
+        
+    # Fact 2: Nicole says "It wasn't me, it was Susan!"
+    formulas.append(
+        Equiv(
+            TellTruth(nicole),
+            And(Not(CrashedServer(nicole)), CrashedServer(susan))
+        )
+    )
+    
+    # Fact 3: Susan says "Nicole's a liar."
+    formulas.append(Equiv(TellTruth(susan), Not(TellTruth(nicole))))
+    
+    # Fact 4: You know that exactly one person is telling the truth.
+    formulas.append(
+        Exists('$x',
+            And(
+                OrList([
+                    Equals('$x', mark),
+                    Equals('$x', john),
+                    Equals('$x', nicole),
+                    Equals('$x', susan)
+                ]),
+                And(
+                    TellTruth('$x'),
+                    Forall('$y',
+                        Implies(
+                            TellTruth('$y'),
+                            Equals('$x', '$y')
+                        )
+                    )
+                )
+            )
+        )
+    )
+
+    # Fact 5: You also know exactly one person crashed the server.
+    formulas.append(
+        Exists('$x',
+            And(
+                OrList([
+                    Equals('$x', mark),
+                    Equals('$x', john),
+                    Equals('$x', nicole),
+                    Equals('$x', susan)
+                ]),
+                And(
+                    CrashedServer('$x'),
+                    Forall('$y',
+                        Implies(
+                            CrashedServer('$y'),
+                            Equals('$x', '$y')
+                        )
+                    )
+                )
+            )
+        )
+    )
     # END_YOUR_CODE
     query = CrashedServer('$x')
     return (formulas, query)
