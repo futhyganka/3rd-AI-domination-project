@@ -3,6 +3,23 @@
 
 import collections
 
+'''
+Nội dung	            Điều cần hiểu
+Knowledge Base (KB)	Cơ sở tri thức dùng để lưu trữ các mệnh đề và quy tắc logic.
+Atom()	            Tạo một mệnh đề nguyên tử.
+Not()	            Phủ định một mệnh đề.
+And()	            Kết hợp hai mệnh đề bằng phép AND.
+Or()	            Kết hợp hai mệnh đề bằng phép OR.
+Implies()         	Biểu diễn quan hệ kéo theo: Nếu P thì Q.
+Equiv()	            Biểu diễn quan hệ tương đương hai chiều.
+Forall()	        Biểu diễn lượng từ "với mọi".
+Exists()	        Biểu diễn lượng từ "tồn tại".
+kb.tell()	        Thêm thông tin hoặc quy tắc vào cơ sở tri thức.
+kb.ask()	        Truy vấn xem một mệnh đề có thể được suy ra hay không.
+kb.dump()	        Hiển thị nội dung của cơ sở tri thức.
+
+'''
+
 # Recursively apply str inside map
 def rstr(x):
     if isinstance(x, tuple): return str(tuple(map(rstr, x)))
@@ -61,7 +78,7 @@ class Constant(Term):
 
 # Predicate symbol (must be capitalized) applied to arguments.
 # Example: LivesIn(john, palo_alto)
-class Atom(Formula):
+class Atom(Formula): # -> name(...args)
     def __init__(self, name, *args):
         if not name[0].isupper(): raise Exception('Predicates must start with a uppercase letter, but got %s' % name)
         self.name = name
@@ -88,7 +105,7 @@ class Not(Formula):
     def computeStrRepn(self): return 'Not(' + str(self.arg) + ')'
 
 # Example: And(Rain,Snow)
-class And(Formula):
+class And(Formula): # arg1 ^ arg2
     def __init__(self, arg1, arg2):
         self.arg1 = self.ensureFormula(arg1)
         self.arg2 = self.ensureFormula(arg2)
@@ -104,7 +121,7 @@ class Or(Formula):
     def computeStrRepn(self): return 'Or(' + str(self.arg1) + ',' + str(self.arg2) + ')'
 
 # Example: Implies(Rain,Wet)
-class Implies(Formula):
+class Implies(Formula): # arg1 -> arg2
     def __init__(self, arg1, arg2):
         self.arg1 = self.ensureFormula(arg1)
         self.arg2 = self.ensureFormula(arg2)
