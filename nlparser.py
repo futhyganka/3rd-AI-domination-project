@@ -9,7 +9,7 @@ from logic import *
 
 class NaturalLanguageProcessor:
     def __init__(self, sentence):
-        self.sentence = sentence
+        self.sentence = sentence # Câu
         self.process()
         # Ensure everything is lowercased:
         self.tokens = [x.lower() for x in self.tokens]
@@ -37,13 +37,24 @@ class NLTKProcessor(NaturalLanguageProcessor):
         import nltk
 
         ### Perform tokenization.
-        self.tokens = nltk.word_tokenize(self.sentence)
+        self.tokens = nltk.word_tokenize(self.sentence) # Tách câu -> list từ
 
         ### Part-of-speech tagging
-        self.pos_tags = [x[1] for x in nltk.pos_tag(self.tokens)]
+        self.pos_tags = [x[1] for x in nltk.pos_tag(self.tokens)] # lấy các nhãn từ loại
+        '''
+        DT: Determiner – từ hạn định.
+        NNS: Noun plural – danh từ số nhiều.
+        VBP: Verb present – động từ hiện tại.
+        VBG: Verb gerund/present participle – dạng V-ing.
+        IN: Preposition – giới từ.
+        NN: Noun singular – danh từ số ít.
+        NNP (Proper Noun, Singular): Danh từ riêng số ít.
+        VBZ (Verb, 3rd Person Singular Present): Động từ hiện tại đơn chia theo ngôi thứ ba số ít.
+        '''
 
         # Hack arround errors in crappy POS tagger
         # Mistakingly tags VBZ as NNS after a NNP (e.g., John lives in a house)
+        # Sửa tag
         for i in range(len(self.pos_tags)-1):
             if self.pos_tags[i] == 'NNP' and self.pos_tags[i+1] == 'NNS':
                 self.pos_tags[i+1] = 'VBZ'
@@ -56,11 +67,11 @@ class NLTKProcessor(NaturalLanguageProcessor):
             if self.tokens[i] == 'like': self.pos_tags[i] = 'VB' # Mistagged as IN
 
         # Lemmatize
-        lemmatizer = nltk.stem.wordnet.WordNetLemmatizer()
+        lemmatizer = nltk.stem.wordnet.WordNetLemmatizer() # hàm đưa từ về nguyên thể
         def lemmatize(token, tag):
             # Only lemmatize with the proper POS
             if token.lower() == 'people': return 'person'
-            if tag[0] in 'VN':
+            if tag[0] in 'VN': # lấy tag V với N để chuyển thôi
                 return lemmatizer.lemmatize(token.lower(), tag[0].lower())
             else:
                 return token
@@ -71,6 +82,7 @@ class SimpleProcessor(NaturalLanguageProcessor):
     def split(self, x):
         # Add spaces around punctuations
         x = re.sub(r'([.,?!:;])', r' \1 ', x)
+        # thêm khoảng trắng vào trước và sau các dấu câu như . , ? ! : ; để tách dấu ra riêng cho hàm split xử lý
         return x.strip().split()
 
     def tag(self, w):
@@ -160,10 +172,18 @@ def lambda_rstr(x):
 
 # A grammar rule parses the right-hand side |rhs| into a |lhs|
 # every $Noun $Verb some $Noun
-class GrammarRule:
+class GrammarRule: # Định nghĩa cấu trúc một quy tắc ngữ pháp.
     def __init__(self, lhs, rhs, sem, score = 0):
-        self.lhs = lhs # Left-hand side: loại cấu trúc được tạo ra
-        self.rhs = rhs # Right-hand side: mẫu thành phần cần nhận diện
+        self.lhs = lhs
+        '''
+        Left-hand side: loại cấu trúc mà quy tắc tạo ra
+            $ROOT:câu hoàn chỉnh
+            $Statement:câu tường thuật
+            $Question:câu hỏi
+            $Clause:mệnh đề
+
+        '''
+        self.rhs = rhs # Right-hand side: DS các thành phần cần nhận diện
         self.sem = sem # Semantic: cách kết hợp ý nghĩa của các thành phần
         self.score = score # Điểm ưu tiên
     def __str__(self):
@@ -173,7 +193,7 @@ class GrammarRule:
 
 BASE_OBJECTS = ['Garfield', 'Pluto', 'Jon']
 
-def createBaseLanguageProcessor():
+def createBaseLanguageProcessor(): # Khai báo danh từ, động từ và tên riêng mà chương trình nhận biết
     # Defines a mapping from each in-domain word to its word class.
     # This automatically creates rules such as
     #   $Noun -> cat
@@ -181,20 +201,24 @@ def createBaseLanguageProcessor():
     categories = {
         'Noun': ['cat', 'tabby', 'mammal', 'person'],
         'Verb': ['likes', 'feeds'],
-        'Name': BASE_OBJECTS,
+        'Name': BASE_OBJECTS, # Tên riêng
         }
     return getCategoryProcessor(categories)
 
-def createBaseEnglishGrammar():
+def createBaseEnglishGrammar(): # Tạo các quy tắc ngữ pháp mẫu
     # Create a basic grammar consisting a set of rules.
     # Please see nlparser.py for more information on the GrammarRule class.
     rules = []
 
     # Parse if it's a question or statement.
     rules.append(GrammarRule('$ROOT', ['$Statement'], lambda args: ('tell', args[0])))
-    rules.append(GrammarRule('$ROOT', ['$Question'], lambda args: ('ask', args[0])))
-    rules.append(GrammarRule('$Statement', ['$Clause', '.'], lambda args: args[0]))
-    rules.append(GrammarRule('$Question', ['$Clause', '?'], lambda args: args[0]))
+    # Tạo 1 câu hoàn chỉnh khi nhận diện đc câu tưởng thuật
+    rules.append(GrammarRule('$ROOT', ['$Question'], lambda args: ('ask', args[0]))) 
+    # Tạo 1 câu hoàn chỉnh khi nhận diện đc câu hỏi
+    rules.append(GrammarRule('$Statement', ['$Clause', '.'], lambda args: args[0])) 
+    # Khi nhận diện đc mệnh đề và dấu '.' thì tạo câu tường thuật
+    rules.append(GrammarRule('$Question', ['$Clause', '?'], lambda args: args[0])) 
+    # Khi nhận diện đc mệnh đề và dấu '?' thì tạo câu hỏi
 
     # Add rule for 'every $Noun is a $Noun'
     rules.append(GrammarRule('$Clause', ['every', '$Noun', 'is', 'a', '$Noun'],
