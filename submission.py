@@ -165,7 +165,7 @@ def createRule1() -> GrammarRule:
     # Return a GrammarRule for 'every $Noun $Verb some $Noun'
     # Note: universal quantification should be outside existential quantification.
     # Every person likes some cat
-    # => \/X person(X) -> ]Y likes(X, Y) ^ cat(Y)
+    # => \/X (person(X) -> ]Y likes(X, Y) ^ cat(Y))
     # BEGIN_YOUR_CODE (our solution is 3 lines of code, but don't worry if you deviate from this)
     return GrammarRule(
         '$Clause',
@@ -214,7 +214,7 @@ def createRule2() -> GrammarRule:
 def createRule3() -> GrammarRule:
     # Return a GrammarRule for 'if a $Noun $Verb a $Noun then the former $Verb the latter'
     # If a person likes a cat then the former feeds the latter
-    # => ]X]Y person(X) ^ like(X, Y) ^ cat(Y) -> feads(X, Y)
+    # => \/X\/Y person(X) ^ like(X, Y) ^ cat(Y) -> feads(X, Y)
     # BEGIN_YOUR_CODE (our solution is 20 lines of code, but don't worry if you deviate from this)
     return GrammarRule(
         '$Clause', 
@@ -224,13 +224,11 @@ def createRule3() -> GrammarRule:
             Forall(
                 '$y',
                 Implies(
-                    And(
+                    AndList([
                         Atom(args[0].title(), '$x'),
-                        And(
-                            Atom(args[1].title(), '$x', '$y'),
-                            Atom(args[2].title(), '$y')
-                        )
-                    ),
+                        Atom(args[1].title(), '$x', '$y'),
+                        Atom(args[2].title(), '$y')
+                    ]),
                     Atom(args[3].title(), '$x', '$y')
                 )
                 
